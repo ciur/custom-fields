@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "custafo"
+version = "0.1.0"
+description = ""
+authors = ["Eugen Ciur <eugen@papermerge.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+typer = "^0.12.5"
+sqlalchemy = "^2.0.35"
+
+[tool.poetry.scripts]
+cf = 'custafo.main:app'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
