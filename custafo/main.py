@@ -1,5 +1,6 @@
 import typer
 from sqlalchemy import select
+from sqlalchemy.orm import join
 from custafo.schema import Base, engine, Document, DocumentType, CustomField, \
     CustomFieldValue, session, DocumentTypeCustomField
 
@@ -62,11 +63,21 @@ def ins_docs():
 
 
 @app.command()
-def list_documents():
-    stmt = select(Document.name).join(
-        DocumentType
-    ).join(
-        CustomField, DocumentTypeCustomField.document_type_id==DocumentType.id
-    )
-    print(stmt)
+def list_docs():
+    #stmt = select(Document).join(
+    #    DocumentType
+    #).join(
+    #    CustomField
+    #)
+    #docs = session.scalar(stmt).all()
+    #for doc in docs:
+    #    print(f"|{doc.id}|{doc.document_type.name}")
+    #stmt = select(Document).join(DocumentType).filter(
+    #    Document=="invoice"
+    #)
+
+    docs = session.scalars(stmt).all()
+    for doc in docs:
+        cf_names = "|".join([cf.name for cf in doc.document_type.custom_fields])
+        print(f"{doc.name}|{doc.document_type.name}|{cf_names}")
 
