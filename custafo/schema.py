@@ -12,18 +12,17 @@ class Base(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
 
 
-document_type_custom_field_association = Table(
-    "document_type_custom_field",
-    Base.metadata,
-    Column(
-        "document_type_id",
-        ForeignKey("document_types.id"),
-    ),
-    Column(
-        "custom_field_id",
-        ForeignKey("custom_fields.id"),
-    ),
-)
+class DocumentTypeCustomField(Base):
+    __tablename__ = "document_type_custom_field"
+
+    document_type_id: Mapped[int] = mapped_column(
+        ForeignKey("document_types.id")
+    )
+
+    custom_field_id: Mapped[int] = mapped_column(
+        ForeignKey("custom_fields.id")
+    )
+
 
 class Document(Base):
     __tablename__ = "documents"
@@ -57,6 +56,5 @@ class DocumentType(Base):
     __tablename__ = "document_types"
     name: Mapped[str]
     custom_fields: Mapped[list["CustomField"]] = relationship(
-        secondary=document_type_custom_field_association
+        secondary="document_type_custom_field"
     )
-
