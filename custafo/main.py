@@ -190,6 +190,7 @@ def get_subq():
             doc.id.label("doc_id"),
             doc.name.label("doc_name"),
             dt.name.label("document_type"),
+            dt.id.label("document_type_id"),
             cf.name.label("cf_name"),
             cast(cfv.value, sqlalchemy.Integer).label("cf_value")
         ).select_from(cfv).join(
@@ -203,7 +204,7 @@ def get_subq():
             cf.name == "total",
             doc.id == cfv.document_id,
             cast(cfv.value, sqlalchemy.Integer) > 10,
-            cast(cfv.value, sqlalchemy.Integer) < 40,
+            cast(cfv.value, sqlalchemy.Integer) < 30,
         ).subquery()
     )
 
@@ -225,4 +226,44 @@ def playj4():
 
     for row in session.execute(stmt):
         print(row)
+
+
+@app.command()
+def playj5():
+    cfv = aliased(CustomFieldValue)
+    cf = aliased(CustomField)
+    dtcf = aliased(DocumentTypeCustomField)
+    dt = aliased(DocumentType)
+
+    subq = get_subq()
+    stmt = select(
+        subq.c.doc_id.label("doc_id"),
+        subq.c.doc_name.label("doc_name"),
+        cf.name.label("cf_name"),
+        cfv.value.label("cf_value")
+    ).select_from(cfv).join(
+       cf, cf.id == cfv.field_id
+    ).join(
+        dtcf, dtcf.custom_field_id == cf.id
+    ).join(
+        dt, dt.id == dtcf.document_type_id
+    ).join(subq, subq.c.document_type_id == dt.id).where(
+        subq.c.doc_id == cfv.document_id
+    ).order_by(subq.c.cf_value)
+
+    documents = {}
+    for row in session.execute(stmt):
+        if row.doc_id not in documents.keys():
+            documents[row.doc_id] = {
+                "doc_id": row.doc_id,
+                "doc_name": row.doc_name,
+                "custom_fields": []
+            }
+        else:
+            documents[row.doc_id]["custom_fields"].append(
+                (row.cf_name, row.cf_value)
+            )
+
+    for key, value in documents.items():
+        print(f"{value['doc_id']} {value['doc_name']} {value['custom_fields']}")
 
