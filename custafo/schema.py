@@ -33,6 +33,9 @@ class Document(Base):
     )
     document_type_id: Mapped[Optional[int]] = mapped_column(ForeignKey("document_types.id"))
 
+    def __repr__(self):
+        return f"Document(id={self.id}, name={self.name})"
+
 
 class CustomField(Base):
     __tablename__ = "custom_fields"
